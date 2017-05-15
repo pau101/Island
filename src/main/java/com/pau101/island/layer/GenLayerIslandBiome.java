@@ -4,7 +4,7 @@ import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.layer.*;
 
-public class GenLayerIslandBiome extends GenLayer {
+public final class GenLayerIslandBiome extends GenLayer {
 	public GenLayerIslandBiome(long seed, GenLayer parent) {
 		super(seed);
 		this.parent = parent;
