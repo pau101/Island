@@ -1,6 +1,8 @@
 package com.pau101.island;
 
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.IChunkGenerator;
@@ -22,13 +24,18 @@ public class Island {
 	public void init(FMLPreInitializationEvent event) {
 		island = new WorldType(ID) {
 			@Override
+			public int getSpawnFuzz(WorldServer world, MinecraftServer server) {
+				return 0;
+			}
+
+			@Override
 			public BiomeProvider getBiomeProvider(World world) {
-				return super.getBiomeProvider(world);
+				return new IslandBiomeProvider(world.getWorldInfo());
 			}
 
 			@Override
 			public IChunkGenerator getChunkGenerator(World world, String generatorOptions) {
-				return super.getChunkGenerator(world, generatorOptions);
+				return new IslandChunkGenerator(world, generatorOptions);
 			}
 		};
 	}
