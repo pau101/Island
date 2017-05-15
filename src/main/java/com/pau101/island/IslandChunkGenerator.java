@@ -1,12 +1,20 @@
 package com.pau101.island;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.WeightedRandom;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.ChunkProviderOverworld;
+import net.minecraftforge.common.BiomeManager;
+import net.minecraftforge.common.BiomeManager.BiomeEntry;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 public final class IslandChunkGenerator extends ChunkProviderOverworld {
 	private static final IBlockState BEDROCK = Blocks.BEDROCK.getDefaultState();
@@ -17,34 +25,61 @@ public final class IslandChunkGenerator extends ChunkProviderOverworld {
 
 	private static final int CHUNK_SIZE = 16;
 
+	private static final int CHECKER_SIZE = 2;
+
 	private final World world;
 
 	private final int seaLevel;
+
+	private final Random rng;
+
+	private final ImmutableList<BiomeEntry> biomes;
+
+	private final int biomeTotalWeight;
 
 	public IslandChunkGenerator(World world, String generatorOptions) {
 		super(world, world.getWorldInfo().getSeed(), world.getWorldInfo().isMapFeaturesEnabled(), generatorOptions);
 		this.world = world;
 		seaLevel = world.getSeaLevel();
+		rng = new Random(world.getWorldInfo().getSeed());
+		ImmutableList.Builder<BiomeEntry> biomes = ImmutableList.builder();
+		for (BiomeManager.BiomeType type : BiomeManager.BiomeType.values()) {
+			List<BiomeEntry> typeBiomes = BiomeManager.getBiomes(type);
+			if (typeBiomes != null) {
+				biomes.addAll(typeBiomes);
+			}
+		}
+		this.biomes = biomes.build();
+		biomeTotalWeight = WeightedRandom.getTotalWeight(this.biomes);
 	}
 
 	@Override
 	public Chunk provideChunk(int chunkX, int chunkZ) {
-		if (Math.abs(chunkX) > RADIUS || Math.abs(chunkZ) > RADIUS) {
+		if (isLayerChunk(chunkX, chunkZ)) {
 			ChunkPrimer primer = new ChunkPrimer();
 			fillLayer(primer, 0, BEDROCK);
 			for (int y = 1; y < seaLevel; y++) {
 				fillLayer(primer, y, OCEAN);
 			}
 			Chunk chunk = new Chunk(world, primer, chunkX, chunkZ);
-			Biome[] biomes = world.getBiomeProvider().getBiomes(null, chunkX * CHUNK_SIZE, chunkZ * CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE);
-			byte[] chunkBiomes = chunk.getBiomeArray();
-			for (int i = 0; i < chunkBiomes.length; ++i) {
-				chunkBiomes[i] = (byte) Biome.getIdForBiome(biomes[i]);
-			}
+			rng.setSeed((long) (chunkX / CHECKER_SIZE) * 341873128712L + (long) (chunkZ / CHECKER_SIZE) * 132897987541L);
+			Biome biome = WeightedRandom.getRandomItem(biomes, rng.nextInt(biomeTotalWeight)).biome;
+			Arrays.fill(chunk.getBiomeArray(), (byte) Biome.getIdForBiome(biome));
 			chunk.generateSkylightMap();
 			return chunk;
 		}
 		return super.provideChunk(chunkX, chunkZ);
+	}
+
+	@Override
+	public void populate(int chunkX, int chunkZ) {
+		if (!isLayerChunk(chunkX, chunkZ)) {
+			super.populate(chunkX, chunkZ);
+		}
+	}
+
+	private boolean isLayerChunk(int chunkX, int chunkZ) {
+		return Math.abs(chunkX) > RADIUS || Math.abs(chunkZ) > RADIUS;
 	}
 
 	private void fillLayer(ChunkPrimer primer, int y, IBlockState state) {
