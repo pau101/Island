@@ -1,0 +1,5 @@
+*.launch
+bin/
+.gradle/
+build/
+eclipse/
