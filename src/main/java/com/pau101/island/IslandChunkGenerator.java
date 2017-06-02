@@ -73,7 +73,11 @@ public final class IslandChunkGenerator extends ChunkProviderOverworld {
 
 	@Override
 	public void populate(int chunkX, int chunkZ) {
-		if (!isLayerChunk(chunkX, chunkZ)) {
+		if (!isLayerChunk(chunkX, chunkZ) &&
+			!isLayerChunk(chunkX + 1, chunkZ) &&
+			!isLayerChunk(chunkX + 1, chunkZ + 1) &&
+			!isLayerChunk(chunkX, chunkZ + 1)
+		) {
 			super.populate(chunkX, chunkZ);
 		}
 	}
