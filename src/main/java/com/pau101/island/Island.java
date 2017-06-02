@@ -24,4 +24,33 @@ public final class Island {
 	public void init(FMLPreInitializationEvent event) {
 		proxy.init();
 	}
+
+	/*public static void main(String[] args) {
+		Random rng = new Random();
+		Random seeder = new Random();
+		long bestIterDiscoverTime = System.currentTimeMillis();
+		int bestDist = Integer.MAX_VALUE;
+		end: while (true) {
+			long seed = seeder.nextLong();
+			rng.setSeed(seed);
+			int iter = 0, x = 0, z = 0;
+			while (true) {
+				x += rng.nextInt(64) - rng.nextInt(64);
+				z += rng.nextInt(64) - rng.nextInt(64);
+				if (++iter == 1000) {
+					int d = x * x + z * z;
+					if (d < bestDist) {
+						long t = System.currentTimeMillis();
+						System.out.printf("best dist: %d %d (%d), seed: %d, time since last: %dms%n", x, z, (int) Math.sqrt(d), seed, t - bestIterDiscoverTime);
+						bestDist = d;
+						bestIterDiscoverTime = t;
+						if (x == 0 && z == 0) {
+							break end;
+						}
+					}
+					break;
+				}
+			}
+		}
+	}*/
 }

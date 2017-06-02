@@ -44,7 +44,7 @@ public final class IslandBiomeProvider extends BiomeProvider {
 
 	@Override
 	public Biome getBiome(BlockPos pos) {
-		return getBiome(pos, (Biome) null);
+		return getBiome(pos, null);
 	}
 
 	@Override
@@ -144,34 +144,21 @@ public final class IslandBiomeProvider extends BiomeProvider {
 		int maxZ = z + range >> 2;
 		int width = maxX - minX + 1;
 		int height = maxZ - minZ + 1;
-		int pad = 1;
-		int gw = width + pad * 2, gh = height + pad * 2;
-		int[] biomes = terrainBiomes.getInts(minX - pad, minZ - pad, gw, gh);
-		boolean[] contains = new boolean[gw * gh];
-		for (int i = 0; i < contains.length; i++) {
-			contains[i] = searchBiomes.contains(Biome.getBiome(biomes[i]));
-		}
-		BlockPos lastKnown = null, pos = null;
+		int[] biomes = terrainBiomes.getInts(minX, minZ, width, height);
+		BlockPos pos = null;
 		int invReplaceChance = 0;
-		for (int dz = 0; dz < height; dz++) {
-			for (int dx = 0; dx < width; dx++) {
-				int blockX = minX + dx << 2;
-				int blockZ = minZ + dz << 2;
-				boolean middle = contains[dx + 1 + (dz + 1) * gw];
-				boolean top = contains[dx + 1 + (dz + 2) * gw];
-				boolean bottom = contains[dx + 1 + (dz) * gw];
-				boolean left = contains[dx + 2 + (dz + 1) * gw];
-				boolean right = contains[dx + (dz + 1) * gw];
-				if (middle) {
-					lastKnown = new BlockPos(blockX, 0, blockZ);
-				}
-				if (middle && top && bottom && left && right && (pos == null || random.nextInt(invReplaceChance + 1) == 0)) {
-					pos = new BlockPos(blockX, 0, blockZ);
-					invReplaceChance++;
-				}
+		for (int i = 0; i < width * height; i++) {
+			int bx = minX + i % width << 2;
+			int bz = minZ + i / width << 2;
+			if (searchBiomes.contains(Biome.getBiome(biomes[i])) && (pos == null || random.nextInt(invReplaceChance + 1) == 0)) {
+				pos = new BlockPos(bx, 0, bz);
+				invReplaceChance++;
 			}
 		}
-		return pos == null ? lastKnown : pos;
+		if (searchBiomes == spawnBiomes) {
+			random.setSeed(4729980882779588452L);
+		}
+		return pos;
 	}
 
 	@Override
