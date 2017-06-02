@@ -6,7 +6,7 @@ import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
-@Mod(modid = Island.ID, name = Island.NAME, version = Island.VERSION)
+@Mod(modid = Island.ID, name = Island.NAME, version = Island.VERSION, acceptableRemoteVersions = "*")
 public final class Island {
 	public static final String ID = "island";
 

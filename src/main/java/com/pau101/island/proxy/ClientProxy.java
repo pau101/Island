@@ -1,9 +1,14 @@
 package com.pau101.island.proxy;
 
+import com.pau101.island.Island;
+import com.pau101.island.IslandConfig;
 import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Config;
+import net.minecraftforge.common.config.ConfigManager;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
@@ -64,8 +69,15 @@ public final class ClientProxy extends CommonProxy {
 	@SubscribeEvent
 	public void guiOpen(GuiOpenEvent event) {
 		GuiScreen gui = event.getGui();
-		if (gui instanceof GuiCreateWorld) {
+		if (IslandConfig.islandIsDefaultWorldType && gui instanceof GuiCreateWorld) {
 			ReflectionHelper.setPrivateValue(GuiCreateWorld.class, (GuiCreateWorld) gui, island.getWorldTypeID(), "field_146331_K", "selectedIndex");
+		}
+	}
+
+	@SubscribeEvent
+	public void onConfigChangedEvent(ConfigChangedEvent.OnConfigChangedEvent event) {
+		if (Island.ID.equals(event.getModID())) {
+			ConfigManager.sync(Island.ID, Config.Type.INSTANCE);
 		}
 	}
 }
